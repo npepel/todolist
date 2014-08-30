@@ -12,15 +12,17 @@ body {
     margin: 0 auto; 
     padding: 50px 10px; 
     text-align: center;
+    position: relative;
 }
 
-header, footer {
+header, footer, h1 {
 	color: #41557d;
 }
 
 footer {
-	position: fixed;
-    left: 0; bottom: 0;
+	position: absolute;
+    left: 0; 
+    bottom: 0;
     padding: 10px; 
     width: 100%; 
 }
@@ -48,7 +50,7 @@ input[type=text] {
 	position: relative;
 }
 
-input[type=button] {
+.form input[type=button] {
 	height: 45px;
 	width: 45px;
 	color: #41557d;
@@ -57,4 +59,65 @@ input[type=button] {
 	top: 0;
 	right: 0;
 	border-radius: 0 4px 4px 0;
+}
+
+.list {
+	min-height: 180px;
+	width: 100%;
+	padding: 10px 0 30px 0;
+	background-color: #f1f0ee;
+	margin-top: 20px; 
+	border-radius: 4px;
+}
+
+.list > div {
+	height: 30px;
+	width: calc(100% - 20px);
+	border-bottom: 1px solid #d5d4d0;
+	padding: 5px 10px;
+}
+
+h2 {
+	color: #c1517d;
+}
+
+.item {
+	color: #4dad78;
+	text-align: left;
+	position: relative;
+}
+
+.item input[type=checkbox],
+.item input[type=button] {
+	background-position: center;
+	background-size: 100%;
+	background-repeat: no-repeat;
+	display: inline-block;
+	height: 30px;
+	width: 30px;
+}
+
+.item input[type=checkbox] {
+	background-image: url(../images/paper.png);
+	opacity: 0.5;
+}
+
+.item input[type=button] {
+	background-image: url(../images/shit.png);
+	background-color: transparent;
+	position: absolute;
+	right: 10px;
+}
+
+input[type=checkbox]:checked {
+	opacity: 1;
+}
+.item span {
+	padding-left: 10px;
+}
+
+.item label,
+input[type=checkbox],
+input[type=button] {
+	cursor: pointer;
 }

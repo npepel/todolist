@@ -26,9 +26,10 @@ textarea{
     -webkit-appearance: none;
 }
 
-input[type=button] {
+input[type=button], input[type=checkbox] {
     -webkit-appearance: none;
     border: none;
+    outline:none;
 }
 
 sub, sup{line-height: 0;}
