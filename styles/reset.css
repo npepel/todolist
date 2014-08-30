@@ -1,0 +1,50 @@
+:focus {-moz-outline-style:none;}
+
+a, a:active {outline:none;}
+
+img {
+ border: none;
+ vertical-align: middle;
+ border-collapse: separate;
+ -ms-interpolation-mode: bicubic;
+}
+
+table { border-collapse: collapse; border-spacing: 0; border: 0;}
+table td { padding: 0;}
+
+form {margin: 0;}
+button::-moz-focus-inner, input::-moz-focus-inner {border: 0; padding: 0;}
+button {overflow:visible; outline: none;}
+button, input, select, textarea {
+    font-size: 100%;
+    margin: 0;
+    vertical-align: middle; 
+}
+textarea{
+    overflow: auto;
+    vertical-align: top;
+    -webkit-appearance: none;
+}
+
+input[type=button] {
+    -webkit-appearance: none;
+    border: none;
+}
+
+sub, sup{line-height: 0;}
+
+html, body, form, li, h1,h2,h3,h4,h5,h6, p {margin: 0; padding:0;}
+ul, ol {margin: 0; padding: 0 0 0 2em;}
+
+header, nav, section, menu, article, figure, aside, footer {display: block; margin: 0; padding:0;}
+[hidden], input[type="hidden"] {display: none;}
+
+html {
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+    -webkit-text-size-adjust: none;
+    font-size: 14px;
+}
+
+button,input,select,textarea { font-family: sans-serif;}

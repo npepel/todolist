@@ -5,4 +5,6 @@ $(document).ready(function() {
 		console.log(itemToAdd)
 		$('.list').append('<input type="checkbox" name="item" value=' + itemToAdd + '>'+ itemToAdd + '<br>');
 	})
+
+	
 })
