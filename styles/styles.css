@@ -15,8 +15,9 @@ body {
     position: relative;
 }
 
-header, footer, h1 {
+header, footer, h1, h4 {
 	color: #41557d;
+	margin-bottom: 10px;
 }
 
 footer {
@@ -35,10 +36,11 @@ input:-moz-placeholder {
 	color: #e19bb6
 }
 
-input[type=text] {
+input[type=text], input[type=password] {
 	height: 15px;
 	width: calc(100% - 40px);
 	padding: 15px 20px;
+	margin-bottom: 5px; 
 	border: none;
 	-webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
@@ -50,7 +52,7 @@ input[type=text] {
 	position: relative;
 }
 
-.form input[type=button] {
+.in-input-btn {
 	height: 45px;
 	width: 45px;
 	color: #41557d;
@@ -59,6 +61,27 @@ input[type=text] {
 	top: 0;
 	right: 0;
 	border-radius: 0 4px 4px 0;
+	margin-left: 1px;
+}
+
+.out-input-btn {
+	height: 40px;
+	width: 70px;
+	margin-top: 10px;
+	color: #41557d;
+	background-color: #a6c9ed;
+	top: 0;
+	right: 0;
+	border-radius: 4px;
+}
+
+.edit {
+	right: 46px;
+	border-radius: 0;
+}
+
+.delete {
+
 }
 
 .list {
@@ -75,6 +98,24 @@ input[type=text] {
 	width: calc(100% - 20px);
 	border-bottom: 1px solid #d5d4d0;
 	padding: 5px 10px;
+}
+
+.lists {
+	width: 100%;
+	background-color: #ffe4e1;
+	margin-top: 20px; 
+	border-radius: 4px;
+}
+
+.lists > div {
+	height: 30px;
+	width: calc(100% - 20px);
+	border-bottom: 1px solid #d5d4d0;
+	padding: 10px 0 5px 20px;
+	text-align: left;
+	font-size: 16px;
+	color: #41557d;
+	position: relative;
 }
 
 h2 {
@@ -120,4 +161,16 @@ input[type=checkbox]:checked {
 input[type=checkbox],
 input[type=button] {
 	cursor: pointer;
+}
+
+.hidden {
+	display: none;
+}
+
+.visible {
+	display: block;
+}
+
+.error {
+	border-color: red;
 }

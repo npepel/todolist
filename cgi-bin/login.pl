@@ -13,6 +13,8 @@ my $username = $cgi->param("username");
 my $userpassword = $cgi->param("password");
 my $json;
 
+print "Content-Type: text/html\n\n";
+
 my $dbh = DBI->connect("DBI:mysql:database=todolist;host=localhost;port=3306",  
   "user", "password") 
   or die $DBI::errstr;
@@ -41,9 +43,5 @@ else {
 	$json = qq{{"success" : "login is successful", "userId" : "$userID"}};
 }
 
-
-
-
-# возвратить JSON-строку
 print $cgi->header(-type => "application/json", -charset => "utf-8");
 print $json;
