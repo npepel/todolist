@@ -30,11 +30,11 @@ $dbh->do(qq{SET NAMES 'utf8'}) or die $dbh->errstr;
 
 if ($action eq 'add') {
 
-	my $user_id = $data->{"user_id"};
+	my $user_id = $data->{"userId"};
 
-	my $list_name = $data->{"list_name"};
+	my $list_name = $data->{"listName"};
 
-	my $items = $data->{"items_to_add"};
+	my $items = $data->{"itemsToAdd"};
 
 	$statement = qq{INSERT INTO profiles (user_id, name) VALUES (?, ?)};
 	$sth = $dbh->prepare($statement)
@@ -60,13 +60,13 @@ if ($action eq 'add') {
 
 elsif ($action eq "update") {
 
-	my $user_id = $data->{"user_id"};
+	my $user_id = $data->{"userId"};
 
-	my $list_id = $data->{"list_id"};
+	my $list_id = $data->{"listId"};
 
-	my $items_to_add = $data->{"items_to_add"};
-	my $items_to_delete = $data->{"items_to_delete"};
-	my $items_to_update = $data->{"items_to_update"};
+	my $items_to_add = $data->{"itemsToAdd"};
+	my $items_to_delete = $data->{"itemsToDelete"};
+	my $items_to_update = $data->{"itemsToUpdate"};
 
 	foreach my $key (keys %{$items_to_add}) {
 
@@ -104,7 +104,7 @@ elsif ($action eq "update") {
 }
 
 elsif ($action eq 'select') {
-	my $list_id = $data->{"list_id"};
+	my $list_id = $data->{"listId"};
 
 	$statement = qq{SELECT * FROM todos WHERE list_id=?};
 	$sth = $dbh->prepare($statement)

@@ -1,13 +1,11 @@
-<div class="todo_content">
-  <header>
-    <h1> To Do List </h1>
-  </header>
+<div class="todoContent">
  
   <div class="form">
     <form name="addForm" method="get" > 
-      <input type="text" name="doItem" placeholder="What you want to do?">
-      <input type="button" class="in-input-btn" id="addButton" value="+">
+      <input type="text" name="doItem" placeholder="What you want to do?" autofocus>
+      <div id="errorMessage" class="hidden"></div>
     </form>
+    <button class="in-input-btn icon-plus" id="addButton">
   </div>
   <div class="list">
     <div><h2> Your awesome list </h2></div>
@@ -22,8 +20,5 @@
     <input type="button" class="out-input-btn" id="addList" value="Add list"> 
   </div>
 
-  <footer>
-    <p> UI Kit by <a href="http://www.unity.hr/ui-kit/">Unity UI Kit</a> </p>
-  </footer>
 </div>
 

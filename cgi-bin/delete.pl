@@ -12,8 +12,8 @@ use lib "/home/nina/perl5/lib/perl5";
 use JSON;
 
 my $cgi = CGI->new;
-my $user_id = $cgi->param("user_id");
-my $list_id = $cgi->param("list_id");
+my $user_id = $cgi->param("userId");
+my $list_id = $cgi->param("listId");
 
 
 my $dbh = DBI->connect("DBI:mysql:database=todolist;host=localhost;port=3306",  

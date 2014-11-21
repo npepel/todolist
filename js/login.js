@@ -1,241 +1,324 @@
-var user_id = localStorage.userid    
+(function(){
+	var $content = $('.content')
+	var $logout = $('#logout')
 
-if (!user_id) {
-    LoginPage ()
-}
-else {
-	ProfileInfo (user_id)
-}
+	var userId = localStorage.userid    
 
-function LoginPage () {
-	var template_req = $.ajax({
-	    type: "GET",
-	    url: "/templates/login.html", 
-	    contentType: "application/json; charset=utf-8",
-	    dataType: "html",
-	});
-	template_req.done(function(data){
-		$(".content").html(data)
-		var $name = $('input[name=username]'),
-		$password = $('input[name=password]')
+	if (!userId) {
+	    loginPage ()
+	}
+	else {
+		profileInfo (userId)
+	}
 
-		$('#loginButton').click(function() {
-			var login_name = $name.val()
-			var login_password = $password.val()
-			CheckLogin (login_name, login_password)
-		})
+	$logout.click(function(e) {
+		e.preventDefault()
+		localStorage.clear();
+		loginPage ($(e.target))
 	})
-}
 
+	function loginPage ($logout) {
+		$logout.addClass('hidden')
 
-function TodoRequest(data_to_send, user_id, list_name) {
-	var todo_req = $.ajax({
-		type: "POST",
-		url: "/cgi-bin/todo.pl", 
-		contentType: "application/json; charset=utf-8",
-		dataType: "json",
-		data: JSON.stringify(data_to_send)
-	});
-	todo_req.fail(function(XMLHttpRequest, textStatus, errorThrown) { 
-		return false;
-	})
-	todo_req.done(function(data){
-		if (data_to_send.action == 'select') {
-			TodoTemplate (user_id, list_name, data_to_send.list_id, data)
-		}
-	})
-}		
-
-function TodoTemplate (user_id, list_name, list_id, todos) {
-	var template_req = $.ajax({
-		type: "GET",
-		url: "/templates/todo.html", 
-		contentType: "application/json; charset=utf-8",
-		dataType: "html",
-		data: "id=" + user_id + "&name=" + list_name
-	});
-	template_req.done(function(data){
-		$(".content").off()
-		$(".profile_content").remove()
-		$(".content").html(data)
-
-		var $input = $('input[name=doItem]'),
-			$list = $('.list')
-
-		var action = list_id ? 'update' : 'add'
-
-		var itemsToAdd = {},
-			itemsToUpdate = {},
-			itemsToDelete = {}
-
-		if (list_id) {
-			$.each(todos, function(id, todo){
-				status = (todo.status == 1) ? 'checked' : ''
-				var checkbox = '<label><input type="checkbox" name="item" value=' + todo.name + ' ' + status + '><span>'+ todo.name + '</span></label><input type="hidden" name="todo_id" value="' + id + '"><input type="button" class="deleteButton">'
-				if ($list.find('.item.empty').length) {
-					var $item = $list.find('.item.empty').eq(0)
-					$item.append(checkbox);
-					$item.removeClass('empty')
-				} 
-				else {
-					$list.append('<div class="item">' + checkbox + '</div>')
-				}
-			})
-		} 
-		
-		$('#addButton').click(function() {
-			var $itemToAdd = $input.val()
-		 	var checkbox = '<label><input type="checkbox" name="item" value=' + $itemToAdd + '><span>'+ $itemToAdd + '</span></label><input type="button" class="deleteButton">'
-			if ($list.find('.item.empty').length) {
-				var $item = $list.find('.item.empty').eq(0)
-				$item.append(checkbox);
-				$item.removeClass('empty')
-				
-			} 
-			else {
-				$list.append('<div class="item">' + checkbox + '</div>')
-			}
-			$('form')[0].reset()
+		var templateReq = $.ajax({
+		    type: "GET",
+		    url: "/templates/login.html", 
+		    contentType: "application/json; charset=utf-8",
+		    dataType: "html",
 		});
-		$('#addList').click(function() {
-			$('input[type=checkbox]').each(function () {
-				var item = $(this).val(),
-					status = this.checked ? '1' : '0'
-				if ($(this).parent().parent().find('input[name=todo_id]').val()) {
-					var todo_id = $(this).parent().parent().find('input[name=todo_id]').val()
-					if (todos[todo_id].status != status) {
-						itemsToUpdate[todo_id] = status
+		templateReq.done(function(data){
+			$content.html(data)
+			var $name = $('input[name=username]'),
+				$password = $('input[name=password]')
+
+			$('#loginButton').click(function() {
+				var $loginResult = $('#loginResult')
+				var loginName = $name.val()
+				var loginPassword = $password.val()
+				var validName = Validation (loginName)
+				var validPassword = Validation (loginPassword)
+				$name.on('input', function() { 
+					$name.removeClass('error')
+				});
+				$password.on('input', function() { 
+					$password.removeClass('error')
+				});
+
+				if (validName === true && validPassword === true) {
+					CheckLogin (loginName, loginPassword)
+				}
+				else {
+					$loginResult.removeClass('hidden')
+					if (validName) {
+						$name.addClass('error')
+						$loginResult.text(validName)
+					}
+					if (validPassword) {
+						$password.addClass('error')
+						$loginResult.text(validPassword)
 					}
 				}
-				else {
-					console.log(status)
-				    itemsToAdd[item] = status
+
+			})
+		})
+	}
+
+
+	function TodoRequest (dataToSend, userId, listName) {  
+		return $.ajax({
+			type: "POST",
+			url: "/cgi-bin/todo.pl", 
+			contentType: "application/json; charset=utf-8",
+			dataType: "json",
+			data: JSON.stringify(dataToSend)
+		});
+	}		
+
+	function TodoTemplate (userId, listName, listId, todos) {
+		var templateReq = $.ajax({
+			type: "GET",
+			url: "/templates/todo.html", 
+			contentType: "application/json; charset=utf-8",
+			dataType: "html",
+			data: "id=" + userId + "&name=" + listName
+		});
+		templateReq.done(function(data){
+			$content.off()
+			$(".profileContent").remove()
+			$content.html(data)
+
+			var $addList = $('#addList'),
+				$addButton = $('#addButton')
+
+			var $input = $('input[name=doItem]'),
+				$list = $('.list')
+
+			var action = listId ? 'update' : 'add'
+
+			var itemsToAdd = {},
+				itemsToUpdate = {},
+				itemsToDelete = {}
+			if (listId) {
+				$.each(todos, function(id, todo){
+					status = (todo.status == 1) ? 'checked' : ''
+					
+					var checkbox = '<label><input type="checkbox" name="item" value=' + todo.name + ' ' + status + '><span>'+ todo.name + '</span></label><input type="hidden" name="todoId" value="' + id + '"><button class="deleteButton icon-minus in-input-btn">'
+
+					if ($list.find('.item.empty').length) {
+						var $item = $list.find('.item.empty').eq(0)
+						$item.append(checkbox);
+						$item.removeClass('empty')
+					} 
+					else {
+						$list.append('<div class="item">' + checkbox + '</div>')
+					}
+				})
+				$("#addList").attr('value', 'Edit list');
+			} 
+			
+			function addButton() {
+				var $itemToAdd = $input.val()
+				var validItem = Validation ($itemToAdd)
+				var $errorMessage = $('#errorMessage')
+				if (validItem != true) {
+					$input.addClass('error')
+					$errorMessage.addClass('visible')
+					$errorMessage.text(validItem)
 				}
+				else {
+				 	var checkbox = '<label><input type="checkbox" name="item" value=' + $itemToAdd + '><span>'+ $itemToAdd + '</span></label><button class="deleteButton icon-minus in-input-btn">'
+					if ($list.find('.item.empty').length) {
+						var $item = $list.find('.item.empty').eq(0)
+						$item.append(checkbox);
+						$item.removeClass('empty')
+						
+					} 
+					else {
+						$list.append('<div class="item">' + checkbox + '</div>')
+					}
+				}
+				$('form')[0].reset()
+			}
+
+			function addList() {
+				$('input[type=checkbox]').each(function () {
+					var item = $(this).val(),
+						status = this.checked ? '1' : '0'
+					if ($(this).parent().parent().find('input[name=todoId]').val()) {
+						var todoId = $(this).parent().parent().find('input[name=todoId]').val()
+						if (todos[todoId].status != status) {
+							itemsToUpdate[todoId] = status
+						}
+					}
+					else {
+					    itemsToAdd[item] = status
+					}
+				});
+				var dataToSend = {"userId": userId, "listName": listName, "listId": listId, "action": action, "itemsToAdd": itemsToAdd, "itemsToUpdate": itemsToUpdate, "itemsToDelete": itemsToDelete }
+			    var todoRequest = TodoRequest(dataToSend)		
+			    todoRequest.done(function () {
+			    	profileInfo (userId)
+			    })
+			}
+
+			function deleteButton() {
+				if ($(this).parent().find('input[name=todoId]').val()) {
+					var todoId = $(this).parent().find('input[name=todoId]').val()
+					itemsToDelete[todoId] = 1
+				}
+				$(this).parent().remove()
+				if ($list.find('.item').length < 5) {
+					$list.append('<div class="item empty"></div>');
+				}
+			}
+
+			$input.on('input', function() { 
+				$input.removeClass('error')
 			});
-			var data_to_send = {"user_id": user_id, "list_name": list_name, "list_id": list_id, "action": action, "items_to_add": itemsToAdd, "items_to_update": itemsToUpdate, "items_to_delete": itemsToDelete }
-		    TodoRequest(data_to_send)		
-		    ProfileInfo (user_id)			
-		});
 
+			$addButton.on('click', addButton);
+			$addList.on('click', addList);
+			$list.on('click', '.deleteButton', deleteButton);
 
-		$list.on('click', '.deleteButton', function() {
-			if ($(this).parent().find('input[name=todo_id]').val()) {
-				var todo_id = $(this).parent().find('input[name=todo_id]').val()
-				itemsToDelete[todo_id] = 1
-			}
-			$(this).parent().remove()
-			if ($list.find('.item').length < 5) {
-				$list.append('<div class="item empty"></div>');
-			}
-		});
-	})
-}
-
-function ProfileTemplate (user_data, user_id) {
-	var template_req = $.ajax({
-	    type: "GET",
-	    url: "/templates/profile.html", 
-	    contentType: "application/json; charset=utf-8",
-	    dataType: "html",
-	});
-	template_req.done(function(data){
-		$(".content").off()
-		$(".login_content").remove()
-		$(".content").html(data)
-
-		var $lists = $('.lists')
-		$.each(user_data, function(id, list){
-			$lists.append('<div class="list_item"><span>' + list.name + '</span>'
-				+ '<input type="button" class="edit in-input-btn" id="editList" value="Edit">'
-				+ '<input type="button" class="delete in-input-btn" id="deleteList" value="Del">'
-				+ '<input type="hidden" name="list_id" value="' + id + '"></div>'
-			)
+			// $addButton.off()
+			// $addList.off()
+			// $list.off()
 		})
+	}
 
-		$lists.on('click', '#deleteList', function() {
-			var list_id = $(this).parent().find('input[name=list_id]').val()
-			DeleteList (user_id, list_id)
+	function ProfileTemplate (userData, userId) {
+		var templateReq = $.ajax({
+		    type: "GET",
+		    url: "/templates/profile.html", 
+		    contentType: "application/json; charset=utf-8",
+		    dataType: "html",
 		});
+		templateReq.done(function(data){
+			$content.off()
+			$(".loginContent").remove()
+			$content.html(data)
+			$logout.removeClass('hidden')
 
-		$lists.on('click', '#editList', function() {
-			var list_id = $(this).parent().find('input[name=list_id]').val()
-			var list_name = $(this).parent().find('span').text()
-			EditList (user_id, list_name, list_id)
-		});
+			var $lists = $('.lists')
+			$.each(userData, function(id, list){
+				$lists.append('<div class="listItem"><span>' + list.name + '</span>'
+					+ '<button class="edit icon-pencil in-input-btn" id="editList"">'
+					+ '<button class="delete icon-trash-o in-input-btn" id="deleteList" value="Del">'
+					+ '<input type="hidden" name="listId" value="' + id + '"></div>'
+				)
+			})
 
-		var $listName = $('input[name=listName]')
+			$lists.on('click', '#deleteList', function() {
+				var listId = $(this).parent().find('input[name=listId]').val()
+				DeleteList (userId, listId)
+			});
 
-		$('#addListButton').click(function() {
-			var list_name = $listName.val()
-			TodoTemplate (user_id, list_name)
+			$lists.on('click', '#editList', function() {
+				var listId = $(this).parent().find('input[name=listId]').val()
+				var listName = $(this).parent().find('span').text()
+				EditList (userId, listName, listId)
+			});
+
+			var $listName = $('input[name=listName]')
+
+			$listName.on('input', function() { 
+				$listName.removeClass('error')
+			});
+
+			$('#addListButton').click(function() {
+				var $errorMessage = $('#errorMessage')
+				var listName = $listName.val()
+				var validList = Validation (listName)
+				if (validList != true) {
+					$listName.addClass('error')
+					$errorMessage.addClass('visible')
+					$errorMessage.text(validList)
+				}
+				else {
+					TodoTemplate (userId, listName)				
+				}
+			})
 		})
-	})
-}
+	}
 
-function ProfileInfo (user_id) {
-	var profile_req = $.ajax({
-        type: "GET",
-        url: "/cgi-bin/profile.pl", 
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        data: "id=" + user_id
-    });
-    profile_req.fail(function(XMLHttpRequest, textStatus, errorThrown) { 
-	$('div#loginResult').text("responseText: " + XMLHttpRequest.responseText + ", textStatus: " + textStatus 
-		+ ", errorThrown: " + errorThrown);
+	function profileInfo (userId) {
+		var profileReq = $.ajax({
+	        type: "GET",
+	        url: "/cgi-bin/profile.pl", 
+	        contentType: "application/json; charset=utf-8",
+	        dataType: "json",
+	        data: "id=" + userId
+	    });
+	    profileReq.fail(function(XMLHttpRequest, textStatus, errorThrown) { 
+		$('#loginResult').text("responseText: " + XMLHttpRequest.responseText + ", textStatus: " + textStatus 
+			+ ", errorThrown: " + errorThrown);
+			})
+		profileReq.done(function(data){
+			var userData = data
+			ProfileTemplate (userData, userId)
 		})
-	profile_req.done(function(data){
-		var user_data = data
-		ProfileTemplate (user_data, user_id)
-	})
-}
+	}
 
-function CheckLogin (login_name, login_password) {
-	var check_req = $.ajax({
-        type: "GET",
-        url: "/cgi-bin/login.pl", 
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        data: "username=" + login_name + "&password=" + login_password
-    });
-    check_req.fail(function(XMLHttpRequest, textStatus, errorThrown) { 
-        	$('div#loginResult').text("responseText: " + XMLHttpRequest.responseText + ", textStatus: " + textStatus 
-        		+ ", errorThrown: " + errorThrown);
-    })
-    check_req.done(function(data){
-	 		if (data.error) { 
-	 			$('div#loginResult').removeClass("hidden");
-        		$('div#loginResult').addClass("visible");
-	 			$('form')[0].reset()
-            	$('div#loginResult').text(data.error);
-            } 
-            else { 
-            	var user_id = data.userId
-            	localStorage.setItem('userid', user_id);
-            	ProfileInfo (user_id)
-            }
-	})
-}
-
-function DeleteList (user_id, list_id) {
-	var profile_req = $.ajax({
-	    type: "GET",
-	    url: "/cgi-bin/delete.pl", 
-	    contentType: "application/json; charset=utf-8",
-	    dataType: "json",
-	    data: "user_id=" + user_id + "&list_id=" + list_id
-    });
-    profile_req.fail(function(XMLHttpRequest, textStatus, errorThrown) { 
-	$('div#loginResult').text("responseText: " + XMLHttpRequest.responseText + ", textStatus: " + textStatus 
-		+ ", errorThrown: " + errorThrown);
+	function CheckLogin (loginName, loginPassword) {
+		var checkReq = $.ajax({
+	        type: "GET",
+	        url: "/cgi-bin/login.pl", 
+	        contentType: "application/json; charset=utf-8",
+	        dataType: "json",
+	        data: "username=" + loginName + "&password=" + loginPassword
+	    });
+	    checkReq.fail(function(XMLHttpRequest, textStatus, errorThrown) { 
+	        	$('#loginResult').text("responseText: " + XMLHttpRequest.responseText + ", textStatus: " + textStatus 
+	        		+ ", errorThrown: " + errorThrown);
+	    })
+	    checkReq.done(function(data){
+		 		if (data.error) { 
+		 			var $loginResult = $('#loginResult')
+		 			$loginResult.removeClass("hidden")
+		 			$('form')[0].reset()
+	            	$loginResult.text(data.error)
+	            } 
+	            else { 
+	            	var userId = data.userId
+	            	localStorage.setItem('userid', userId);
+	            	profileInfo (userId)
+	            }
 		})
-	profile_req.done(function(data){
-		var user_data = data
-		ProfileInfo (user_id)
-	})
-}
+	}
 
-function EditList (user_id, list_name, list_id) {
-	var data_to_send = {"list_id": list_id, "action": "select" }
-	var todos = TodoRequest(data_to_send, user_id, list_name)	
-}
+	function DeleteList (userId, listId) {
+		var profileReq = $.ajax({
+		    type: "GET",
+		    url: "/cgi-bin/delete.pl", 
+		    contentType: "application/json; charset=utf-8",
+		    dataType: "json",
+		    data: "userId=" + userId + "&listId=" + listId
+	    });
+	    profileReq.fail(function(XMLHttpRequest, textStatus, errorThrown) { 
+		$('#loginResult').text("responseText: " + XMLHttpRequest.responseText + ", textStatus: " + textStatus 
+			+ ", errorThrown: " + errorThrown);
+			})
+		profileReq.done(function(data){
+			var userData = data
+			profileInfo (userId)
+		})
+	}
+
+	function EditList (userId, listName, listId) {
+		var dataToSend = {"listId": listId, "action": "select" }
+		var todoRequest = TodoRequest(dataToSend, userId, listName)	
+		todoRequest.done(function (data) { TodoTemplate(userId, listName, listId, data) })
+	}
+
+	function Validation (text) {
+		if (text === '') {
+			return 'Field can\'t be empty'
+		}
+		else if (!text.match(/^[0-9a-zA-Zа-яА-Я]+$/)) {
+			return 'You can use only letters and numbers'
+		}
+		else {
+			return true
+		}
+	}
+})()
