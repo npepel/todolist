@@ -17,7 +17,7 @@
 		loginPage ($(e.target))
 	})
 
-	function loginPage ($logout) {
+	function loginPage () {
 		$logout.addClass('hidden')
 
 		var templateReq = $.ajax({
@@ -93,6 +93,8 @@
 			var $input = $('input[name=doItem]'),
 				$list = $('.list')
 
+			var $errorMessage = $('#errorMessage')
+
 			var action = listId ? 'update' : 'add'
 
 			var itemsToAdd = {},
@@ -119,10 +121,9 @@
 			function addButton() {
 				var $itemToAdd = $input.val()
 				var validItem = Validation ($itemToAdd)
-				var $errorMessage = $('#errorMessage')
 				if (validItem != true) {
 					$input.addClass('error')
-					$errorMessage.addClass('visible')
+					$errorMessage.removeClass('hidden')
 					$errorMessage.text(validItem)
 				}
 				else {
@@ -166,23 +167,23 @@
 					var todoId = $(this).parent().find('input[name=todoId]').val()
 					itemsToDelete[todoId] = 1
 				}
-				$(this).parent().remove()
-				if ($list.find('.item').length < 5) {
-					$list.append('<div class="item empty"></div>');
-				}
+				$(this).parent().addClass('removed-item').on('webkitAnimationEnd oanimationend msAnimationEnd animationend', function() {$(this).trigger('remove').remove()})
+				$(this).parent().on('remove', function() {
+					if ($list.find('.item').length < 5) {
+						$list.append('<div class="item empty"></div>');
+					}
+				})
 			}
 
 			$input.on('input', function() { 
 				$input.removeClass('error')
+				$errorMessage.addClass('hidden')
 			});
 
 			$addButton.on('click', addButton);
 			$addList.on('click', addList);
 			$list.on('click', '.deleteButton', deleteButton);
 
-			// $addButton.off()
-			// $addList.off()
-			// $list.off()
 		})
 	}
 
@@ -199,21 +200,30 @@
 			$content.html(data)
 			$logout.removeClass('hidden')
 
+			var $errorMessage = $('#errorMessage')
+			var $popup = $('#popup')
+
 			var $lists = $('.lists')
 			$.each(userData, function(id, list){
 				$lists.append('<div class="listItem"><span>' + list.name + '</span>'
-					+ '<button class="edit icon-pencil in-input-btn" id="editList"">'
-					+ '<button class="delete icon-trash-o in-input-btn" id="deleteList" value="Del">'
+					+ '<button class="edit icon-pencil in-input-btn js-editList">'
+					+ '<button class="delete icon-trash-o in-input-btn js-deleteList" value="Del">'
 					+ '<input type="hidden" name="listId" value="' + id + '"></div>'
 				)
 			})
 
-			$lists.on('click', '#deleteList', function() {
+			$lists.on('click', '.js-deleteList', function() {
 				var listId = $(this).parent().find('input[name=listId]').val()
-				DeleteList (userId, listId)
+				$popup.removeClass('hidden')
+				$('#closePopupButton').click(function() {
+					$popup.addClass('hidden')
+				})
+				$('#okPopupButton').click(function() {
+					DeleteList (userId, listId)
+				})
 			});
 
-			$lists.on('click', '#editList', function() {
+			$lists.on('click', '.js-editList', function() {
 				var listId = $(this).parent().find('input[name=listId]').val()
 				var listName = $(this).parent().find('span').text()
 				EditList (userId, listName, listId)
@@ -223,6 +233,8 @@
 
 			$listName.on('input', function() { 
 				$listName.removeClass('error')
+				$errorMessage.addClass('hidden')
+
 			});
 
 			$('#addListButton').click(function() {
@@ -231,7 +243,7 @@
 				var validList = Validation (listName)
 				if (validList != true) {
 					$listName.addClass('error')
-					$errorMessage.addClass('visible')
+					$errorMessage.removeClass('hidden')
 					$errorMessage.text(validList)
 				}
 				else {
@@ -314,7 +326,7 @@
 		if (text === '') {
 			return 'Field can\'t be empty'
 		}
-		else if (!text.match(/^[0-9a-zA-Zа-яА-Я]+$/)) {
+		else if (!text.match(/^[0-9a-zA-Zа-яА-Я ]+$/)) {
 			return 'You can use only letters and numbers'
 		}
 		else {
